@@ -1,6 +1,6 @@
 <?php
-require_once dirname(__FILE__).'/events/WhatsAppEventListener.php';
-require_once dirname(__FILE__).'/events/WhatsAppEventListenerLegacyAdapter.php';
+
+  namespace WhatsApi;
 
 /**
  * @file

@@ -40,7 +40,7 @@ for ($i=3; $i<$argc; $i++) {
 }
 
 echo "[] Logging in as '$nickname' ($sender)\n";
-$wa = new WhatsProt($sender, $imei, $nickname, TRUE);
+$wa = new WhatsProtocol($sender, $imei, $nickname, TRUE);
 
 $wa->connect();
 $wa->loginWithPassword($password);
