@@ -4,6 +4,11 @@
 
 
 
+  /**
+   * Class Rc4
+   *
+   * @package WhatsApi\Common
+   */
   class Rc4
   {
 

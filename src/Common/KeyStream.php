@@ -4,6 +4,11 @@
 
 
 
+  /**
+   * Class KeyStream
+   *
+   * @package WhatsApi\Common
+   */
   class KeyStream
   {
 
@@ -32,7 +37,7 @@
 
 
 
-    public static function GenerateKeys($password, $nonce)
+    public static function generateKeys($password, $nonce)
     {
       $array  = array(
         "key", //placeholders
@@ -40,12 +45,14 @@
         "key",
         "key"
       );
+
       $array2 = array(1, 2, 3, 4);
       $nonce .= '0';
+
       for ($j = 0; $j < count($array); $j++)
       {
         $nonce[(strlen($nonce) - 1)] = chr($array2[$j]);
-        $foo                         = wa_pbkdf2("sha1", $password, $nonce, 2, 20, true);
+        $foo                         = Cryptography::waPbkdf2("sha1", $password, $nonce, 2, 20, true);
         $array[$j]                   = $foo;
       }
 
@@ -54,17 +61,19 @@
 
 
 
-    public function DecodeMessage($buffer, $macOffset, $offset, $length)
+    public function decodeMessage($buffer, $macOffset, $offset, $length)
     {
       $mac = $this->computeMac($buffer, $offset, $length);
+
       //validate mac
       for ($i = 0; $i < 4; $i++)
       {
         $foo = ord($buffer[$macOffset + $i]);
         $bar = ord($mac[$i]);
+
         if ($foo !== $bar)
         {
-          throw new Exception("MAC mismatch: $foo != $bar");
+          throw new \Exception("MAC mismatch: $foo != $bar");
         }
       }
 
@@ -73,7 +82,7 @@
 
 
 
-    public function EncodeMessage($buffer, $macOffset, $offset, $length)
+    public function encodeMessage($buffer, $macOffset, $offset, $length)
     {
       $data = $this->rc4->cipher($buffer, $offset, $length);
       $mac  = $this->computeMac($data, $offset, $length);

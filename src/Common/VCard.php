@@ -4,7 +4,12 @@
 
 
 
-  class vCard
+  /**
+   * Class VCard
+   *
+   * @package WhatsApi\Common
+   */
+  class VCard
   {
 
 

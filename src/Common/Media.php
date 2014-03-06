@@ -4,6 +4,11 @@
 
 
 
+  /**
+   * Class Media
+   *
+   * @package WhatsApi\Common
+   */
   class Media
   {
 
@@ -11,14 +16,17 @@
     static function preprocessProfilePicture($path)
     {
       list($width, $height) = getimagesize($path);
+
       if ($width != $height)
       {
         throw new \Exception("Profile picture needs to be square (image is $width x $height)");
       }
+
       if ($width > 640)
       {
         throw new \Exception("Profile picture maximum size of 640 x 640 (image is $width x $height)");
       }
+
       $img = imagecreatefromjpeg($path);
       unlink($path);
       imagejpeg($img, $path, 50);
@@ -53,6 +61,7 @@
     static function createIconGD($file, $size = 100, $raw = false)
     {
       list($width, $height) = getimagesize($file);
+
       if ($width > $height)
       {
         //landscape
@@ -64,6 +73,7 @@
         $nwidth  = ($width / $height) * $size;
         $nheight = $size;
       }
+
       $image_p = imagecreatetruecolor($nwidth, $nheight);
       $image   = imagecreatefromjpeg($file);
       imagecopyresampled($image_p, $image, 0, 0, 0, 0, $nwidth, $nheight, $width, $height);
@@ -71,6 +81,7 @@
       imagejpeg($image_p);
       $i = ob_get_contents();
       ob_end_clean();
+
       if ($raw)
       {
         return $i;
@@ -118,9 +129,12 @@
     {
       //check if ffmpeg is intalled
       $cmd = "ffmpeg -version";
-      $res = exec($cmd, $output, $returnvalue);
+      exec($cmd, $output, $returnvalue);
+
       if ($returnvalue == 0)
+      {
         return true;
+      }
 
       return false;
     }

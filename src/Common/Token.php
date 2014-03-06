@@ -4,6 +4,11 @@
 
 
 
+  /**
+   * Class Token
+   *
+   * @package WhatsApi\Common
+   */
   class Token
   {
 
@@ -405,7 +410,7 @@
 
 
 
-    public static function TryGetToken($string, &$subdict, &$token)
+    public static function tryGetToken($string, &$subdict, &$token)
     {
       $foo = array_search($string, self::$primaryStrings);
       if ($foo)
@@ -428,7 +433,7 @@
 
 
 
-    public static function GetToken($token, &$subdict, &$string)
+    public static function getToken($token, &$subdict, &$string)
     {
       //override subdict
       if (!$subdict && $token >= 236 && $token < (236 + count(self::$secondaryStrings)))
@@ -451,7 +456,7 @@
       $string = $tokenMap[$token];
       if (!$string)
       {
-        throw new \Exception("Invalid token/length in GetToken");
+        throw new \Exception("Invalid token/length in getToken");
       }
     }
 

@@ -4,6 +4,11 @@
 
 
 
+  /**
+   * Class MediaUploader
+   *
+   * @package WhatsApi\Common
+   */
   class MediaUploader
   {
 
