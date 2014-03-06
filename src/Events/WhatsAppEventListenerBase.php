@@ -5,17 +5,19 @@
 
 
   /**
+   * Class WhatsAppEventListenerBase
+   *
    * Empty implementation of WhatsAppEventListener. See that class for documentation.
    *
-   * This class provides no functionality, but allows developers to
-   *  use it as a base class so that their classes don't need to
-   *  define every method in the WhatsAppEventListener interface.
-   *  By extending this class, it will also allow new methods to be
-   *  created in the interface without the developer needing to update
-   *  their base classes.
    *
-   * @file
-   * Event class to received WhatsApp related events.
+   * This class provides no functionality, but allows developers to
+   * use it as a base class so that their classes don't need to
+   * define every method in the WhatsAppEventListener interface.
+   * By extending this class, it will also allow new methods to be
+   * created in the interface without the developer needing to update
+   * their base classes.
+   *
+   * @package WhatsApi\Events
    */
   class WhatsAppEventListenerBase implements WhatsAppEventListener
   {

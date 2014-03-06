@@ -5,8 +5,11 @@
 
 
   /**
-   * @file
-   * Event class to received WhatsApp related events.
+   * Interface WhatsAppEventListener
+   *
+   * Event interface to received WhatsApp related events.
+   *
+   * @package WhatsApi\Events
    */
   interface WhatsAppEventListener
   {

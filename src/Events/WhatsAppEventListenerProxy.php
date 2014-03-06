@@ -3,22 +3,27 @@
   namespace WhatsApi\Events;
 
 
-  /*
-   * This class may be helpful if you want to handle all events the same way.
-   */
-
-
 
   /**
+   * Class WhatsAppEventListenerProxy
+   *
+   * This class may be helpful if you want to handle all events the same way.
+   *
    * Funnels all events through the abstract handleEvent method.
+   *
+   * @package WhatsApi\Events
    */
   abstract class WhatsAppEventListenerProxy implements WhatsAppEventListener
   {
 
 
     /**
-     *  This method will get all event calls.
+     * This method will get all event calls.
      *
+     * @param string $eventName
+     * @param array  $arguments
+     *
+     * @return mixed
      */
     abstract protected function handleEvent($eventName, array $arguments);
 
