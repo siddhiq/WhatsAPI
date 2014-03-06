@@ -1,0 +1,22 @@
+{
+  "name": "WhatsAPI/WhatsAPI",
+  "description": "Interface to WhatsApp Messenger",
+  "keywords": ["whatsapp", "api"],
+  "homepage": "https://github.com/venomous0x/WhatsAPI",
+  "minimum-stability": "stable",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "The WhatsAPI Team ( Refactored by rafitaFCB )"
+    }
+  ],
+  "require": {
+      "php": ">=5.3.2"
+  },
+  "autoload": {
+      "psr-0": {
+          "WhatsApi": "src/"
+      }
+  }
+}
