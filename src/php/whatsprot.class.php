@@ -36,6 +36,7 @@ class WhatsProt
      */
     protected $accountInfo;             // The AccountInfo object.
     protected $challengeData;           //
+    protected $challengeDataLocation = ''; //
     protected $debug;                   // Determines whether debug mode is on or off.
     protected $event;                   // An instance of the WhatsAppEvent class.
     protected $groupList = array();     // An array with all the groups a user belongs in.
@@ -440,7 +441,7 @@ class WhatsProt
     public function loginWithPassword($password)
     {
         $this->password = $password;
-        $challengeData = @file_get_contents("nextChallenge.dat");
+        $challengeData = @file_get_contents( $this->getChallengeDataFileName() );
         if($challengeData) {
             $this->challengeData = $challengeData;
         }
@@ -1262,6 +1263,17 @@ class WhatsProt
     }
 
     /**
+     * Sets the location of the ChallengeData file. This may be needed
+     * if the default location is not writable for the current user.
+     */
+
+    public function setChallengeDataLocation($dir){
+        if(is_dir($dir) && is_writable($dir)){
+            $this->challengeDataLocation = $dir;
+        }
+    }
+
+    /**
      * Sets the bind of the new message.
      */
     public function setNewMessageBind($bind)
@@ -1570,6 +1582,17 @@ class WhatsProt
         return (strlen(urldecode($identity)) == 20);
     }
 
+    /**
+     * Returns ChallengeData file name
+     */
+    protected function getChallengeDataFileName(){
+        if($this->challengeDataLocation !==''){
+            return $this->challengeDataLocation . DIRECTORY_SEPARATOR . $this->phoneNumber . "nextChallenge.dat";
+        }else {
+            return dirname(__FILE__) . DIRECTORY_SEPARATOR . 'ChallengeData'. DIRECTORY_SEPARATOR . $this->phoneNumber . "nextChallenge.dat";
+        }
+    }
+
     public function sendSync(array $numbers, $mode = "full", $context = "registration", $index = 0, $last = true)
     {
         $users = array();
@@ -1779,7 +1802,7 @@ class WhatsProt
         } elseif ($node->getTag() == "success") {
             $this->loginStatus = static::CONNECTED_STATUS;
             $challengeData = $node->getData();
-            file_put_contents("nextChallenge.dat", $challengeData);
+            file_put_contents($this->getChallengeDataFileName(), $challengeData);
             $this->writer->setKey($this->outputKey);
         } elseif($node->getTag() == "failure")
         {
