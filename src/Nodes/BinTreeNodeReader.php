@@ -4,18 +4,40 @@
 
 
 
+  use WhatsApi\Common\Token;
+
+
+
+  /**
+   * Class BinTreeNodeReader
+   *
+   * @package WhatsApi\Nodes
+   */
   class BinTreeNodeReader
   {
 
 
+    /**
+     * Input of node for read
+     *
+     * @var string
+     */
     private $input;
 
 
-    /** @var $key KeyStream */
+    /**
+     * KeyStream instance object
+     *
+     * @var \WhatsAPI\Common\KeyStream
+     */
     private $key;
 
 
 
+    /**
+     * Reset a xml node key
+     *
+     */
     public function resetKey()
     {
       $this->key = null;
@@ -23,6 +45,11 @@
 
 
 
+    /**
+     * Set a xml node key
+     *
+     * @param string $key
+     */
     public function setKey($key)
     {
       $this->key = $key;
@@ -30,31 +57,44 @@
 
 
 
+    /**
+     * Get next tree of node
+     *
+     * @param null $input
+     *
+     * @return null|ProtocolNode
+     * @throws \Exception
+     */
     public function nextTree($input = null)
     {
       if ($input != null)
       {
         $this->input = $input;
       }
+
       $stanzaFlag = ($this->peekInt8() & 0xF0) >> 4;
       $stanzaSize = $this->peekInt16(1);
+
       if ($stanzaSize > strlen($this->input))
       {
         throw new \Exception("Incomplete message $stanzaSize != " . strlen($this->input));
       }
+
       $this->readInt24();
+
       if ($stanzaFlag & 8)
       {
         if (isset($this->key))
         {
           $realSize    = $stanzaSize - 4;
-          $this->input = $this->key->DecodeMessage($this->input, $realSize, 0, $realSize); // . $remainingData;
+          $this->input = $this->key->decodeMessage($this->input, $realSize, 0, $realSize); // . $remainingData;
         }
         else
         {
           throw new \Exception("Encountered encrypted message, missing key");
         }
       }
+
       if ($stanzaSize > 0)
       {
         return $this->nextTreeInternal();
@@ -65,15 +105,26 @@
 
 
 
+    /**
+     * Get token of node
+     *
+     * @param string $token
+     *
+     * @return string
+     * @throws \Exception
+     */
     protected function getToken($token)
     {
       $ret     = "";
       $subdict = false;
-      TokenMap::GetToken($token, $subdict, $ret);
+
+      Token::getToken($token, $subdict, $ret);
+
       if (!$ret)
       {
         $token = $this->readInt8();
-        TokenMap::GetToken($token, $subdict, $ret);
+        Token::getToken($token, $subdict, $ret);
+
         if (!$ret)
         {
           throw new \Exception("BinTreeNodeReader->getToken: Invalid token $token");
@@ -85,13 +136,23 @@
 
 
 
+    /**
+     * Read string from token
+     *
+     * @param string $token
+     *
+     * @return string
+     * @throws \Exception
+     */
     protected function readString($token)
     {
       $ret = "";
+
       if ($token == -1)
       {
         throw new \Exception("BinTreeNodeReader->readString: Invalid token $token");
       }
+
       if (($token > 4) && ($token < 0xf5))
       {
         $ret = $this->getToken($token);
@@ -119,6 +180,7 @@
       {
         $user   = $this->readString($this->readInt8());
         $server = $this->readString($this->readInt8());
+
         if ((strlen($user) > 0) && (strlen($server) > 0))
         {
           $ret = $user . "@" . $server;
@@ -134,10 +196,18 @@
 
 
 
+    /**
+     * Read attributes of node from size
+     *
+     * @param int $size
+     *
+     * @return array
+     */
     protected function readAttributes($size)
     {
       $attributes  = array();
       $attribCount = ($size - 2 + $size % 2) / 2;
+
       for ($i = 0; $i < $attribCount; $i++)
       {
         $key              = $this->readString($this->readInt8());
@@ -150,11 +220,17 @@
 
 
 
+    /**
+     * Get next internal tree of node
+     *
+     * @return null|ProtocolNode
+     */
     protected function nextTreeInternal()
     {
       $token = $this->readInt8();
       $size  = $this->readListSize($token);
       $token = $this->readInt8();
+
       if ($token == 1)
       {
         $attributes = $this->readAttributes($size);
@@ -165,13 +241,17 @@
       {
         return null;
       }
+
       $tag        = $this->readString($token);
       $attributes = $this->readAttributes($size);
+
       if (($size % 2) == 1)
       {
         return new ProtocolNode($tag, $attributes, null, "");
       }
+
       $token = $this->readInt8();
+
       if ($this->isListTag($token))
       {
         return new ProtocolNode($tag, $attributes, $this->readList($token), "");
@@ -182,6 +262,13 @@
 
 
 
+    /**
+     * Check if token is a tag of list
+     *
+     * @param string $token
+     *
+     * @return bool
+     */
     protected function isListTag($token)
     {
       return (($token == 248) || ($token == 0) || ($token == 249));
@@ -189,10 +276,18 @@
 
 
 
+    /**
+     * Get list from token
+     *
+     * @param string $token
+     *
+     * @return array
+     */
     protected function readList($token)
     {
       $size = $this->readListSize($token);
       $ret  = array();
+
       for ($i = 0; $i < $size; $i++)
       {
         array_push($ret, $this->nextTreeInternal());
@@ -203,9 +298,18 @@
 
 
 
+    /**
+     * Get size of list from token
+     *
+     * @param string $token
+     *
+     * @return int
+     * @throws \Exception
+     */
     protected function readListSize($token)
     {
       $size = 0;
+
       if ($token == 0xf8)
       {
         $size = $this->readInt8();
@@ -216,7 +320,7 @@
       }
       else
       {
-        throw new Exception("BinTreeNodeReader->readListSize: Invalid token $token");
+        throw new \Exception("BinTreeNodeReader->readListSize: Invalid token $token");
       }
 
       return $size;
@@ -227,6 +331,7 @@
     protected function peekInt24($offset = 0)
     {
       $ret = 0;
+
       if (strlen($this->input) >= (3 + $offset))
       {
         $ret = ord(substr($this->input, $offset, 1)) << 16;
@@ -242,6 +347,7 @@
     protected function readInt24()
     {
       $ret = $this->peekInt24();
+
       if (strlen($this->input) >= 3)
       {
         $this->input = substr($this->input, 3);
@@ -255,6 +361,7 @@
     protected function peekInt16($offset = 0)
     {
       $ret = 0;
+
       if (strlen($this->input) >= (2 + $offset))
       {
         $ret = ord(substr($this->input, $offset, 1)) << 8;
@@ -269,6 +376,7 @@
     protected function readInt16()
     {
       $ret = $this->peekInt16();
+
       if ($ret > 0)
       {
         $this->input = substr($this->input, 2);
@@ -282,6 +390,7 @@
     protected function peekInt8($offset = 0)
     {
       $ret = 0;
+
       if (strlen($this->input) >= (1 + $offset))
       {
         $sbstr = substr($this->input, $offset, 1);
@@ -296,6 +405,7 @@
     protected function readInt8()
     {
       $ret = $this->peekInt8();
+
       if (strlen($this->input) >= 1)
       {
         $this->input = substr($this->input, 1);
@@ -306,9 +416,17 @@
 
 
 
+    /**
+     * Fill array of readed input
+     *
+     * @param int $len
+     *
+     * @return string
+     */
     protected function fillArray($len)
     {
       $ret = "";
+
       if (strlen($this->input) >= $len)
       {
         $ret         = substr($this->input, 0, $len);

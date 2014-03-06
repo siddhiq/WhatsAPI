@@ -4,18 +4,40 @@
 
 
 
+  use WhatsApi\Common\Token;
+
+
+
+  /**
+   * Class BinTreeNodeWriter
+   *
+   * @package WhatsApi\Nodes
+   */
   class BinTreeNodeWriter
   {
 
 
+    /**
+     * Output for write node
+     *
+     * @var string
+     */
     private $output;
 
 
-    /** @var $key KeyStream */
+    /**
+     * KeyStream instance object
+     *
+     * @var \WhatsAPI\Common\KeyStream
+     */
     private $key;
 
 
 
+    /**
+     * Reset a xml node key
+     *
+     */
     public function resetKey()
     {
       $this->key = null;
@@ -23,6 +45,11 @@
 
 
 
+    /**
+     * Set a xml node key
+     *
+     * @param string $key
+     */
     public function setKey($key)
     {
       $this->key = $key;
@@ -30,7 +57,15 @@
 
 
 
-    public function StartStream($domain, $resource)
+    /**
+     * Start stream for write node
+     *
+     * @param string $domain
+     * @param string $resource
+     *
+     * @return string
+     */
+    public function startStream($domain, $resource)
     {
       $attributes = array();
       $header     = "WA";
@@ -49,7 +84,10 @@
 
 
     /**
+     * Write from node
+     *
      * @param ProtocolNode $node
+     * @param bool $encrypt
      *
      * @return string
      */
@@ -70,26 +108,33 @@
 
 
     /**
+     * Write internal node
+     *
      * @param ProtocolNode $node
      */
     protected function writeInternal($node)
     {
       $len = 1;
+
       if ($node->getAttributes() != null)
       {
         $len += count($node->getAttributes()) * 2;
       }
+
       if (count($node->getChildren()) > 0)
       {
         $len += 1;
       }
+
       if (strlen($node->getData()) > 0)
       {
         $len += 1;
       }
+
       $this->writeListStart($len);
       $this->writeString($node->getTag());
       $this->writeAttributes($node->getAttributes());
+
       if (strlen($node->getData()) > 0)
       {
         $this->writeBytes($node->getData());
@@ -97,6 +142,7 @@
       if ($node->getChildren())
       {
         $this->writeListStart(count($node->getChildren()));
+
         foreach ($node->getChildren() as $child)
         {
           $this->writeInternal($child);
@@ -106,6 +152,13 @@
 
 
 
+    /**
+     * Parse a 24 bits integer from data string
+     *
+     * @param string $data
+     *
+     * @return int
+     */
     protected function parseInt24($data)
     {
       $ret = ord(substr($data, 0, 1)) << 16;
@@ -117,21 +170,30 @@
 
 
 
+    /**
+     * Flush buffer of output
+     *
+     * @param bool $encrypt
+     *
+     * @return string
+     */
     protected function flushBuffer($encrypt = true)
     {
       $size = strlen($this->output);
       $data = $this->output;
+
       if ($this->key != null && $encrypt)
       {
         $bsize = $this->getInt24($size);
         //encrypt
-        $data     = $this->key->EncodeMessage($data, $size, 0, $size);
+        $data     = $this->key->encodeMessage($data, $size, 0, $size);
         $len      = strlen($data);
         $bsize[0] = chr((8 << 4) | (($len & 16711680) >> 16));
         $bsize[1] = chr(($len & 65280) >> 8);
         $bsize[2] = chr($len & 255);
         $size     = $this->parseInt24($bsize);
       }
+
       $ret          = $this->writeInt24($size) . $data;
       $this->output = '';
 
@@ -140,6 +202,13 @@
 
 
 
+    /**
+     * Get an integer of 24 bits
+     *
+     * @param int $length
+     *
+     * @return string
+     */
     protected function getInt24($length)
     {
       $ret = '';
@@ -152,6 +221,11 @@
 
 
 
+    /**
+     * Write token to output
+     *
+     * @param string $token
+     */
     protected function writeToken($token)
     {
       if ($token < 0xf5)
@@ -166,9 +240,16 @@
 
 
 
+    /**
+     * Write jabber id from user and server
+     *
+     * @param string $user
+     * @param string $server
+     */
     protected function writeJid($user, $server)
     {
       $this->output .= "\xfa";
+
       if (strlen($user) > 0)
       {
         $this->writeString($user);
@@ -177,11 +258,19 @@
       {
         $this->writeToken(0);
       }
+
       $this->writeString($server);
     }
 
 
 
+    /**
+     * Write 8 bites integer
+     *
+     * @param int $v
+     *
+     * @return string
+     */
     protected function writeInt8($v)
     {
       $ret = chr($v & 0xff);
@@ -191,6 +280,13 @@
 
 
 
+    /**
+     * Write 16 bites integer
+     *
+     * @param int $v
+     *
+     * @return string
+     */
     protected function writeInt16($v)
     {
       $ret = chr(($v & 0xff00) >> 8);
@@ -201,6 +297,13 @@
 
 
 
+    /**
+     * Write 24 bits integer
+     *
+     * @param int $v
+     *
+     * @return string
+     */
     protected function writeInt24($v)
     {
       $ret = chr(($v & 0xff0000) >> 16);
@@ -212,9 +315,15 @@
 
 
 
+    /**
+     * Write bytes to ouput
+     *
+     * @param string $bytes
+     */
     protected function writeBytes($bytes)
     {
       $len = strlen($bytes);
+
       if ($len >= 0x100)
       {
         $this->output .= "\xfd";
@@ -225,16 +334,23 @@
         $this->output .= "\xfc";
         $this->output .= $this->writeInt8($len);
       }
+
       $this->output .= $bytes;
     }
 
 
 
+    /**
+     * Write tag of node
+     *
+     * @param string $tag
+     */
     protected function writeString($tag)
     {
       $intVal  = -1;
       $subdict = false;
-      if (TokenMap::TryGetToken($tag, $subdict, $intVal))
+
+      if (Token::tryGetToken($tag, $subdict, $intVal))
       {
         if ($subdict)
         {
@@ -244,7 +360,9 @@
 
         return;
       }
+
       $index = strpos($tag, '@');
+
       if ($index)
       {
         $server = substr($tag, $index + 1);
@@ -259,6 +377,11 @@
 
 
 
+    /**
+     * Write attributes of node
+     *
+     * @param array $attributes
+     */
     protected function writeAttributes($attributes)
     {
       if ($attributes)
@@ -273,6 +396,11 @@
 
 
 
+    /**
+     * Write list start to ouput
+     *
+     * @param int $len
+     */
     protected function writeListStart($len)
     {
       if ($len == 0)
