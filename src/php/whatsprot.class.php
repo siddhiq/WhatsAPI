@@ -1055,7 +1055,7 @@ class WhatsProt
      */
     public function sendMessageVideo($to, $filepath, $storeURLmedia = false)
     {
-        $allowedExtensions = array('mp4', 'mov', 'avi');
+        $allowedExtensions = array('3gp', 'mp4', 'mov', 'avi');
         $size = 20 * 1024 * 1024; // Easy way to set maximum file size for this media type.
         return $this->sendCheckAndSendMedia($filepath, $size, $to, 'video', $allowedExtensions, $storeURLmedia);
     }
@@ -1255,9 +1255,7 @@ class WhatsProt
         $vCardNode = new ProtocolNode("vcard", $vCardAttribs, null, $vCard);
 
         $mediaAttribs = array();
-        $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
         $mediaAttribs["type"] = "vcard";
-        $mediaAttribs["encoding"] = "text";
 
         $mediaNode = new ProtocolNode("media", $mediaAttribs, array($vCardNode), "");
         $this->sendMessageNode($to, $mediaNode);
@@ -1360,7 +1358,7 @@ class WhatsProt
         $this->outputKey = new KeyStream($keys[0], $keys[1]);
         $phone = $this->dissectPhone();
         $array = "\0\0\0\0" . $this->phoneNumber . $this->challengeData;// . time() . static::WHATSAPP_USER_AGENT . " MccMnc/" . str_pad($phone["mcc"], 3, "0", STR_PAD_LEFT) . "001";
-        $response = $this->outputKey->EncodeMessage($array, 4, strlen($array) - 4);
+        $response = $this->outputKey->EncodeMessage($array, 0, 4, strlen($array) - 4);
         return $response;
     }
 
@@ -1572,6 +1570,31 @@ class WhatsProt
         return (strlen(urldecode($identity)) == 20);
     }
 
+    public function sendSync(array $numbers, $mode = "full", $context = "registration", $index = 0, $last = true)
+    {
+        $users = array();
+        foreach ($numbers as $number) { // number must start with '+' if international contact
+            $users[] = new ProtocolNode("user", null, null, (substr($number, 0, 1) != '+')?('+' . $number):($number));
+        }
+
+        $node = new ProtocolNode("iq", array(
+            "to" => $this->getJID($this->phoneNumber),
+            "type" => "get",
+            "id" => $this->createMsgId("sendsync_"),
+            "xmlns" => "urn:xmpp:whatsapp:sync"
+        ), array(
+            new ProtocolNode("sync", array(
+                "mode" => $mode,
+                "context" => $context,
+                "sid" => "".((time() + 11644477200) * 10000000),
+                "index" => "".$index,
+                "last" => $last ? "true" : "false"
+            ), $users, null)
+        ), null);
+
+        $this->sendNode($node);
+    }
+
     /**
      * Process number/jid and turn it into a JID if necessary
      *
@@ -1594,6 +1617,8 @@ class WhatsProt
 
         return $number;
     }
+
+
 
     /**
      * Retrieves media file and info from either a URL or localpath
@@ -2002,6 +2027,46 @@ class WhatsProt
             $this->sendPong($node->getAttribute('id'));
         }
         if ($node->getTag() == "iq"
+            && $node->getChild("sync") != null) {
+
+            //sync result
+            $sync = $node->getChild('sync');
+            $existing = $sync->getChild("in");
+            $nonexisting = $sync->getChild("out");
+
+            //process existing first
+            $existingUsers = array();
+            if (!empty($existing)) {
+                foreach ($existing->getChildren() as $child) {
+                    $existingUsers[$child->getData()] = $child->getAttribute("jid");
+                }
+            }
+
+            //now process failed numbers
+            $failedNumbers = array();
+            if (!empty($nonexisting)) {
+                foreach ($nonexisting->getChildren() as $child) {
+                    $failedNumbers[] = str_replace('+', '', $child->getData());
+                }
+            }
+
+            $index = $sync->getAttribute("index");
+            $this->eventManager()->fireGetSyncResult(
+                $index,
+                $sync->getAttribute("sync"),
+                $existingUsers,
+                $failedNumbers
+            );
+        }
+        if ($node->getTag() == "receipt") {
+            $this->eventManager()->fireGetReceipt(
+                $node->getAttribute('from'),
+                $node->getAttribute('id'),
+                $node->getAttribute('offline'),
+                $node->getAttribute('retry')
+            );
+        }
+        if ($node->getTag() == "iq"
             && $node->getAttribute('type') == "result") {
             $this->serverReceivedId = $node->getAttribute('id');
             if ($node->getChild(0) != null &&
@@ -2103,6 +2168,18 @@ class WhatsProt
                         $node->getChild(0)
                     );
         }
+        
+        $children = $node->getChild(0);
+		if ($node->getTag() == "stream:error" && empty($children) == false && $node->getChild(0)->getTag() == "system-shutdown") 
+		{
+		
+			throw new Exception('Error system-shutdown');
+		
+		}
+        
+        
+        
+        
         if($node->getTag() == "notification")
         {
             $name = $node->getAttribute("notify");
@@ -2328,7 +2405,7 @@ class WhatsProt
                 $icon = createIcon($filepath);
                 break;
             case "video":
-                $icon = videoThumbnail();
+                $icon = createVideoIcon($filepath);
                 break;
             default:
                 $icon = '';
@@ -2572,7 +2649,7 @@ class WhatsProt
         }
         else
         {
-            $messageHash["type"] = "chat";
+            $messageHash["type"] = "media";
         }
         $messageHash["id"] = ($id == null?$this->createMsgId("message"):$id);
         $messageHash["t"] = time();
