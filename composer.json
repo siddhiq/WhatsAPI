@@ -1,8 +1,8 @@
 {
-  "name": "WhatsAPI/WhatsAPI",
+  "name": "whatsapi/whatsapi",
   "description": "Interface to WhatsApp Messenger",
   "keywords": ["whatsapp", "api"],
-  "homepage": "https://github.com/venomous0x/WhatsAPI",
+  "homepage": "https://bitbucket.org/shirioko/whatsapi/",
   "minimum-stability": "stable",
   "type": "library",
   "license": "MIT",
