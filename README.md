@@ -7,8 +7,8 @@ Interface to WhatsApp Messenger
 ### Note March 07th, 2014
 *This fork is created for use php namespaces*
 
-*Also I created this fork for use [Composer](https://getcomposer.org) because the package available in packagist isn't correct and have some errors*
-*When start this fork, I get the last code from [shirioko](https://bitbucket.org/shirioko/whatsapi/) and add one change from [Jonathan Williamson](https://github.com/jonnywilliamson) (See CHANGELOG)*
+*Also I created this fork for use [Composer](https://getcomposer.org) because the package available in packagist isn't correct and have some errors.*
+*When start this fork, I get the last code from [shirioko](https://bitbucket.org/shirioko/whatsapi/) and add one change from [Jonathan Williamson](https://github.com/jonnywilliamson). (See CHANGELOG)*
 *However this fork not contains any additional functionality. Contains the same functionalities of original repository.*
 
 **I only added the namespaces and refactored the project structure and the code**
