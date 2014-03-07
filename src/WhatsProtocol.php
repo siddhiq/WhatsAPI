@@ -1336,10 +1336,18 @@
 
     /**
      * Send available status for start chat
+     *
+     * @var string|null $nickname
      */
-    public function sendAvailableForChat()
+    public function sendAvailableForChat( $nickname = null )
     {
       $presence         = array();
+
+      if($nickname)
+      {
+        $this->name = $nickname;
+      }
+
       $presence['name'] = $this->name;
       $node             = new ProtocolNode("presence", $presence, null, "");
 
