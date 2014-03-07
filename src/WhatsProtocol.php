@@ -2520,7 +2520,7 @@
               $node->getChild(0)->getChild(0)->getChildren()
             );
           }
-          if ($node->getChild(0)->getAttribute('xmlns') == 'jabber:iq:last')
+          if ($node->getChild("query") != null)
           {
             $this->eventManager()->fireGetRequestLastSeen(
               $this->phoneNumber,
@@ -2645,6 +2645,8 @@
             break;
           case "picture":
             //TODO
+            break;
+          case "contacts":
             break;
           default:
             throw new \Exception("Method $type not implemented");
