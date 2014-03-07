@@ -1,6 +1,6 @@
 Available events and arguments
 ==============================
-See events/WhatsAppEventListener.php.
+See Events/WhatsAppEventListener.php.
 
 How to bind a callback to an event
 ==================================
@@ -8,9 +8,8 @@ How to bind a callback to an event
 # Create a WhatsAppEventListener class and implement the method you
 #  would like to handle:
 ```php
-require 'events/WhatsAppEventListenerBase.php';
 
-class MyEventListener extends WhatsAppEventListenerBase {
+class MyEventListener extends \WhatsApi\Events\WhatsAppEventListenerBase {
     function onGetMessage(
         $phone, // The user phone number including the country code.
         $from, // The sender JID.
@@ -24,13 +23,9 @@ class MyEventListener extends WhatsAppEventListenerBase {
     }
 }
 ```
-# Require your new class;
-```php
-require 'MyEventListener.php';
-```
 # Create an instance of WhastProt.
 ```php
-$w = new WhatsProt($userPhone, $userIdentity, $userName, $debug);
+$w = new \WhatsApi\WhatsProtocol($userPhone, $userIdentity, $userName, $debug);
 ```
 # Add your event listener.
 ```php

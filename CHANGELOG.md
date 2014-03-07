@@ -1,3 +1,11 @@
+Mar 07, 2014
+============
+- Start the refactor of project: add comments, delete deprecated code and unused files, perform a big clean, placing all files in folders with semantic names.
+- Add support to namespaces.
+- Add composer.json for packagist. ( https://packagist.org/packages/whatsapi/whatsapi )
+- Add support to define path of ChallengeData. ( https://github.com/jonnywilliamson/WhatsAPI/commit/c333546692de1f440e2b52a49a195401eb54395a | https://github.com/jonnywilliamson/WhatsAPI/commit/0f3c31ac93b14b1cc3743a7559a6ab4f327b674c )
+- Synchronize with the bitbucket repository of Shirioko with the last fixes and changes. ( https://bitbucket.org/shirioko/whatsapi )
+
 Feb 14, 2013
 ============
 - Merge pull request #271 from facine/master Fix properties typo. && Add auto-upload images to WhatsApp servers and auto-generate icon.
