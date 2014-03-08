@@ -37,16 +37,7 @@
 
     static function createIcon($file)
     {
-      // @todo: Add support for others methods.
-      if (class_exists("Imagick"))
-      {
-        $img = new \Imagick();
-        $img->readImageBlob(file_get_contents($file));
-        $img->thumbnailImage(100, 100, true);
-
-        return base64_encode($img);
-      }
-      elseif (extension_loaded('gd'))
+      if (extension_loaded('gd'))
       {
         return self::createIconGD($file);
       }
@@ -100,21 +91,18 @@
       // @see: http://stackoverflow.com/questions/14662027/generate-thumbnail-for-a-bunch-of-mp4-video-in-a-folder
       //return giftThumbnail();
       /* should install ffmpeg for the method to work successfully  */
-      if (class_exists("Imagick") && self::checkFFMPEG())
+      if (self::checkFFMPEG())
       {
         //generate thumbnail
         $preview = sys_get_temp_dir() . '/' . md5($file) . '.jpg';
         @unlink($preview);
+
         //capture video preview
         $command = "ffmpeg -i \"" . $file . "\" \"" . $preview . "\"";
         exec($command);
-        // Parsear la imagen
-        //TODO: Make it work using libGD (see createIcon())
-        $img = new \Imagick($preview);
-        // Redimensionar la imagen
-        $img->thumbnailImage(100, 100, true);
 
-        return base64_encode($img);
+        // Parsear la imagen
+        return self::createIconGD($preview);
       }
       else
       {

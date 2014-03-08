@@ -29,7 +29,6 @@
   },
   "suggest": {
     "ext-gd"      : "To use the thumbnails of resources",
-    "ext-imagick" : "To use the image thumbnails of resources",
     "ffmpeg"      : "To use the video thumbnails of resources"
   },
   "autoload": {
