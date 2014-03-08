@@ -3047,18 +3047,9 @@
       $messageHash["id"]   = $this->createMsgId("broadcast");
       $messageNode = new ProtocolNode("message", $messageHash, array($broadcastNode, $xNode, $node), null);
 
-      if (!$this->lastId)
-      {
-        $this->lastId = $messageHash["id"];
-        $this->sendNode($messageNode);
-        //listen for response
-        $this->waitForServer($messageHash["id"]);
-      }
-      else
-      {
-        $this->outQueue[] = $messageNode;
-      }
+      $this->sendNode($messageNode);
 
+      //listen for response
       $this->eventManager()->fireSendMessage(
         $this->phoneNumber,
         $targets,
@@ -3182,17 +3173,7 @@
       $messageHash["t"]  = time();
       $messageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode, $reqnode, $node), "");
 
-      if (!$this->lastId)
-      {
-        $this->lastId = $messageHash["id"];
-        $this->sendNode($messageNode);
-        //listen for response
-        $this->waitForServer($messageHash["id"]);
-      }
-      else
-      {
-        $this->outQueue[] = $messageNode;
-      }
+      $this->sendNode($messageNode);
 
       $this->eventManager()->fireSendMessage(
         $this->phoneNumber,
