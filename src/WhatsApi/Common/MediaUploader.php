@@ -3,6 +3,9 @@
   namespace WhatsApi\Common;
 
 
+  use WhatsApi\WhatsProtocol;
+
+
 
   /**
    * Class MediaUploader
@@ -86,7 +89,7 @@
       $POST = "POST " . $url . "\r\n";
       $POST .= "Content-Type: multipart/form-data; boundary=" . $boundary . "\r\n";
       $POST .= "Host: " . $host . "\r\n";
-      $POST .= "User-Agent: WhatsApp/2.3.53 S40Version/14.26 Device/Nokia302\r\n";
+      $POST .= "User-Agent: " . WhatsProtocol::WHATSAPP_USER_AGENT . "\r\n";
       $POST .= "Content-Length: " . $contentlength . "\r\n\r\n";
 
       return self::sendData($host, $POST, $hBAOS, $filepath, $mediafile, $fBAOS);
