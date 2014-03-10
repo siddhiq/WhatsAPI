@@ -10,6 +10,7 @@
   use WhatsApi\Common\MediaUploader;
   use WhatsApi\Common\Token;
   use WhatsApi\Events\WhatsAppEvent;
+  use WhatsApi\Models\SyncResult;
   use WhatsApi\Nodes\BinTreeNodeReader;
   use WhatsApi\Nodes\BinTreeNodeWriter;
   use WhatsApi\Nodes\ProtocolNode;
@@ -2494,12 +2495,9 @@
           }
         }
         $index = $sync->getAttribute("index");
-        $this->eventManager()->fireGetSyncResult(
-          $index,
-          $sync->getAttribute("sync"),
-          $existingUsers,
-          $failedNumbers
-        );
+        $result = new SyncResult($index, $sync->getAttribute("sync"), $existingUsers, $failedNumbers);
+
+        $this->eventManager()->fireGetSyncResult($result);
       }
       if ($node->getTag() == "receipt")
       {

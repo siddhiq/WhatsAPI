@@ -644,12 +644,15 @@
     }
 
 
-
+    /**
+     * Base callback fired when synchronization result is obtained
+     *
+     * @param \WhatsApi\Models\SyncResult $result
+     *
+     * @return mixed
+     */
     public function onGetSyncResult(
-      $index,
-      $sid,
-      $existingUsers,
-      $failedNumbers
+      $result
     )
     {
     }

@@ -949,16 +949,16 @@
 
 
 
+    /**
+     * @param \WhatsApi\Models\SyncResult $result
+     */
     function fireGetSyncResult(
-      $index,
-      $sid,
-      $existingUsers,
-      $failedNumbers
+      $result
     )
     {
-      $callbackEvent = function (WhatsAppEventListener $listener) use ($index, $sid, $existingUsers, $failedNumbers)
+      $callbackEvent = function (WhatsAppEventListener $listener) use ($result)
       {
-        $listener->onGetSyncResult($index, $sid, $existingUsers, $failedNumbers);
+        $listener->onGetSyncResult($result);
       };
       $this->fireCallback($callbackEvent);
     }
