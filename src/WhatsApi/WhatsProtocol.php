@@ -74,10 +74,10 @@
     protected $outQueue = array(); // Queue for outgoing messages.
     protected $password; // The user password.
     protected $phoneNumber; // The user phone number including the country code without '+' or '00'.
-    protected $reader; // An instance of the BinaryTreeNodeReader class.
     protected $serverReceivedId; // Confirm that the *server* has received your command.
     protected $socket; // A socket to connect to the WhatsApp network.
     protected $writer; // An instance of the BinaryTreeNodeWriter class.
+    protected $reader; // An instance of the BinaryTreeNodeReader class.
 
 
 
@@ -1956,10 +1956,12 @@
         $users[] = new ProtocolNode("user", null, null, (substr($number, 0, 1) != '+') ? ('+' . $number) : ($number));
       }
 
+      $id = $this->createMsgId("sendsync_");
+
       $node = new ProtocolNode("iq", array(
         "to"    => $this->getJID($this->phoneNumber),
         "type"  => "get",
-        "id"    => $this->createMsgId("sendsync_"),
+        "id"    => $id,
         "xmlns" => "urn:xmpp:whatsapp:sync"
       ), array(
         new ProtocolNode("sync", array(
@@ -1972,6 +1974,8 @@
       ), null);
 
       $this->sendNode($node);
+
+      return $id;
     }
 
 
@@ -2918,8 +2922,6 @@
      */
     protected function readStanza()
     {
-      $buff = '';
-
       if ($this->socket != null)
       {
         $header = @fread($this->socket, 3); //read stanza header
@@ -2935,9 +2937,8 @@
           throw new \Exception("Failed to read stanza header");
         }
 
-        $treeLength = 0;
         $treeLength = ord($header[1]) << 8;
-        +$treeLength |= ord($header[2]) << 0;
+        $treeLength |= ord($header[2]) << 0;
 
         $buff = @fread($this->socket, $treeLength);
 
