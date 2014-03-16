@@ -77,7 +77,7 @@
     protected $serverReceivedId; // Confirm that the *server* has received your command.
     protected $socket; // A socket to connect to the WhatsApp network.
     protected $writer; // An instance of the BinaryTreeNodeWriter class.
-    protected $reader; // An instance of the BinaryTreeNodeReader class.
+    public $reader; // An instance of the BinaryTreeNodeReader class.
 
 
 
@@ -2920,7 +2920,7 @@
     /**
      * Read 1024 bytes from the whatsapp server.
      */
-    protected function readStanza()
+    public function readStanza()
     {
       if ($this->socket != null)
       {
