@@ -555,14 +555,15 @@
     /**
      * Pull from the socket, and place incoming messages in the message queue.
      *
+     * @param bool $autoReceipt
      */
-    public function pollMessages()
+    public function pollMessages($autoReceipt = true)
     {
       $stanza = $this->readStanza();
 
       while ($stanza)
       {
-        $this->processInboundData($stanza);
+        $this->processInboundData($stanza, $autoReceipt);
         $stanza = $this->readStanza();
       }
     }
@@ -2165,14 +2166,15 @@
      *
      * @param string $data
      *   The data to process.
+     * @param bool   $autoReceipt
      */
-    protected function processInboundData($data)
+    protected function processInboundData($data, $autoReceipt = true)
     {
       $node = $this->reader->nextTree($data);
 
       if ($node != null)
       {
-        $this->processInboundDataNode($node);
+        $this->processInboundDataNode($node, $autoReceipt);
       }
     }
 
@@ -2183,8 +2185,12 @@
      *
      * This also provides a convenient method to use to unit test the event framework.
      *
+     * @param ProtocolNode $node
+     * @param bool         $autoReceipt
+     *
+     * @throws \Exception
      */
-    protected function processInboundDataNode(ProtocolNode $node)
+    protected function processInboundDataNode(ProtocolNode $node, $autoReceipt = true)
     {
       $this->debugPrint($node->nodeString("rx  ") . "\n");
       if ($node->getTag() == "challenge")
@@ -2208,18 +2214,7 @@
       if ($node->getTag() == "message")
       {
         array_push($this->messageQueue, $node);
-        //do not send received confirmation if sender is yourself
-        if (strpos($node->getAttribute('from'), $this->phoneNumber . '@' . static::WHATSAPP_SERVER) === false
-          &&
-          (
-            $node->hasChild("request")
-            ||
-            $node->hasChild("received")
-          )
-        )
-        {
-          $this->sendMessageReceived($node);
-        }
+
         if ($node->hasChild('x') && $this->lastId == $node->getAttribute('id'))
         {
           $this->sendNextMessage();
@@ -2258,7 +2253,10 @@
               $node->getChild("body")->getData()
             );
           }
-          $this->sendMessageReceived($node);
+          if($autoReceipt)
+          {
+            $this->sendMessageReceived($node);
+          }
         }
         if ($node->hasChild('notification') && $node->getChild('notification')->getAttribute('type') == 'picture')
         {
