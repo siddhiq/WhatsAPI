@@ -2937,11 +2937,27 @@
         $treeLength = ord($header[1]) << 8;
         $treeLength |= ord($header[2]) << 0;
 
+        //read full length
         $buff = @fread($this->socket, $treeLength);
+        $len = strlen($buff);
+
+        while(strlen($buff) < $treeLength)
+        {
+          $toRead = $treeLength - strlen($buff);
+          $buff .= @fread($this->socket, $toRead);
+
+          if($len == strlen($buff))
+          {
+            //no new data read, fuck it
+            break;
+          }
+
+          $len = strlen($buff);
+        }
 
         if (strlen($buff) != $treeLength)
         {
-          throw new \Exception("Tree length did not match received length");
+          throw new \Exception("Tree length did not match received length (buff = " . strlen($buff) . " & treeLength = $treeLength)");
         }
         elseif (@feof($this->socket))
         {
