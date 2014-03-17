@@ -4,6 +4,18 @@ Interface to WhatsApp Messenger
 
 ----------
 
+### Note March 17th, 2014
+*Package of this project in [Packagist](https://packagist.org)*
+
+*I will maintain this project while I can or until there is an official API.*
+*I'll also update with all the changes that are published in the main project and the most interesting and right branches.*
+
+*URL: [Packagist whatsapi/whatsapi](https://packagist.org/packages/whatsapi/whatsapi)*
+
+*\- [rafitaFCB](https://github.com/rafitaFCB)*
+
+----------
+
 ### Note March 07th, 2014
 *This fork is created for use php namespaces*
 
