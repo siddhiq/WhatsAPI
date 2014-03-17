@@ -489,8 +489,9 @@
 
     function onSendMessageReceived(
       $phone,
-      $time,
-      $from
+      $id,
+      $from,
+      $type
     )
     {
     }

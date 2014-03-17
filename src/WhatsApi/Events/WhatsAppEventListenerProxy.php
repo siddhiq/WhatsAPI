@@ -535,8 +535,9 @@
 
     function onSendMessageReceived(
       $phone,
-      $time,
-      $from
+      $id,
+      $from,
+      $type
     )
     {
       $this->handleEvent(__FUNCTION__, func_get_args());

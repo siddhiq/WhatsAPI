@@ -2217,7 +2217,7 @@
         {
           $this->newMsgBind->process($node);
         }
-        if ($node->getChild('notify') != null && $node->getChild(0)->getAttribute('name') != '' && $node->getChild('body') != null)
+        if ($node->getAttribute("type") == "text" && $node->getChild('body') != null)
         {
           $author = $node->getAttribute("author");
           if ($author == "")
@@ -2229,7 +2229,7 @@
               $node->getAttribute('id'),
               $node->getAttribute('type'),
               $node->getAttribute('t'),
-              $node->getChild("notify")->getAttribute('name'),
+              $node->getAttribute("notify"),
               $node->getChild("body")->getData()
             );
           }
@@ -2243,7 +2243,7 @@
               $node->getAttribute('id'),
               $node->getAttribute('type'),
               $node->getAttribute('t'),
-              $node->getChild("notify")->getAttribute('name'),
+              $node->getAttribute("notify"),
               $node->getChild("body")->getData()
             );
           }
@@ -2273,9 +2273,9 @@
             );
           }
         }
-        if ($node->getChild('notify') != null && $node->getChild(0)->getAttribute('name') != null && $node->getChild('media') != null)
+        if ($node->getAttribute("type") == "media" && $node->getChild('media') != null)
         {
-          if ($node->getChild(2)->getAttribute('type') == 'image')
+          if ($node->getChild("media")->getAttribute('type') == 'image')
           {
             $this->eventManager()->fireGetImage(
               $this->phoneNumber,
@@ -2283,18 +2283,18 @@
               $node->getAttribute('id'),
               $node->getAttribute('type'),
               $node->getAttribute('t'),
-              $node->getChild(0)->getAttribute('name'),
-              $node->getChild(2)->getAttribute('size'),
-              $node->getChild(2)->getAttribute('url'),
-              $node->getChild(2)->getAttribute('file'),
-              $node->getChild(2)->getAttribute('mimetype'),
-              $node->getChild(2)->getAttribute('filehash'),
-              $node->getChild(2)->getAttribute('width'),
-              $node->getChild(2)->getAttribute('height'),
-              $node->getChild(2)->getData()
+              $node->getAttribute('notify'),
+              $node->getChild("media")->getAttribute('size'),
+              $node->getChild("media")->getAttribute('url'),
+              $node->getChild("media")->getAttribute('file'),
+              $node->getChild("media")->getAttribute('mimetype'),
+              $node->getChild("media")->getAttribute('filehash'),
+              $node->getChild("media")->getAttribute('width'),
+              $node->getChild("media")->getAttribute('height'),
+              $node->getChild("media")->getData()
             );
           }
-          elseif ($node->getChild(2)->getAttribute('type') == 'video')
+          elseif ($node->getChild("media")->getAttribute('type') == 'video')
           {
             $this->eventManager()->fireGetVideo(
               $this->phoneNumber,
@@ -2302,19 +2302,19 @@
               $node->getAttribute('id'),
               $node->getAttribute('type'),
               $node->getAttribute('t'),
-              $node->getChild(0)->getAttribute('name'),
-              $node->getChild(2)->getAttribute('url'),
-              $node->getChild(2)->getAttribute('file'),
-              $node->getChild(2)->getAttribute('size'),
-              $node->getChild(2)->getAttribute('mimetype'),
-              $node->getChild(2)->getAttribute('filehash'),
-              $node->getChild(2)->getAttribute('duration'),
-              $node->getChild(2)->getAttribute('vcodec'),
-              $node->getChild(2)->getAttribute('acodec'),
-              $node->getChild(2)->getData()
+              $node->getAttribute('notify'),
+              $node->getChild("media")->getAttribute('url'),
+              $node->getChild("media")->getAttribute('file'),
+              $node->getChild("media")->getAttribute('size'),
+              $node->getChild("media")->getAttribute('mimetype'),
+              $node->getChild("media")->getAttribute('filehash'),
+              $node->getChild("media")->getAttribute('duration'),
+              $node->getChild("media")->getAttribute('vcodec'),
+              $node->getChild("media")->getAttribute('acodec'),
+              $node->getChild("media")->getData()
             );
           }
-          elseif ($node->getChild(2)->getAttribute('type') == 'audio')
+          elseif ($node->getChild("media")->getAttribute('type') == 'audio')
           {
             $this->eventManager()->fireGetAudio(
               $this->phoneNumber,
@@ -2322,17 +2322,17 @@
               $node->getAttribute('id'),
               $node->getAttribute('type'),
               $node->getAttribute('t'),
-              $node->getChild(0)->getAttribute('name'),
-              $node->getChild(2)->getAttribute('size'),
-              $node->getChild(2)->getAttribute('url'),
-              $node->getChild(2)->getAttribute('file'),
-              $node->getChild(2)->getAttribute('mimetype'),
-              $node->getChild(2)->getAttribute('filehash'),
-              $node->getChild(2)->getAttribute('duration'),
-              $node->getChild(2)->getAttribute('acodec')
+              $node->getAttribute('notify'),
+              $node->getChild("media")->getAttribute('size'),
+              $node->getChild("media")->getAttribute('url'),
+              $node->getChild("media")->getAttribute('file'),
+              $node->getChild("media")->getAttribute('mimetype'),
+              $node->getChild("media")->getAttribute('filehash'),
+              $node->getChild("media")->getAttribute('duration'),
+              $node->getChild("media")->getAttribute('acodec')
             );
           }
-          elseif ($node->getChild(2)->getAttribute('type') == 'vcard')
+          elseif ($node->getChild("media")->getAttribute('type') == 'vcard')
           {
             $this->eventManager()->fireGetvCard(
               $this->phoneNumber,
@@ -2340,30 +2340,35 @@
               $node->getAttribute('id'),
               $node->getAttribute('type'),
               $node->getAttribute('t'),
-              $node->getChild(0)->getAttribute('name'),
-              $node->getChild(2)->getChild(0)->getAttribute('name'),
-              $node->getChild(2)->getChild(0)->getData()
+              $node->getAttribute('notify'),
+              $node->getChild("media")->getChild("vcard")->getAttribute('name'),
+              $node->getChild("media")->getChild("vcard")->getData()
             );
           }
-          elseif ($node->getChild(2)->getAttribute('type') == 'location')
+          elseif ($node->getChild("media")->getAttribute('type') == 'location')
           {
-            $url  = $node->getChild(2)->getAttribute('url');
-            $name = $node->getChild(2)->getAttribute('name');
+            $url = $node->getChild("media")->getAttribute('url');
+            $name = $node->getChild("media")->getAttribute('name');
+
             $this->eventManager()->fireGetLocation(
               $this->phoneNumber,
               $node->getAttribute('from'),
               $node->getAttribute('id'),
               $node->getAttribute('type'),
               $node->getAttribute('t'),
-              $node->getChild(0)->getAttribute('name'),
+              $node->getAttribute('notify'),
               $name,
-              $node->getChild(2)->getAttribute('longitude'),
-              $node->getChild(2)->getAttribute('latitude'),
+              $node->getChild("media")->getAttribute('longitude'),
+              $node->getChild("media")->getAttribute('latitude'),
               $url,
-              $node->getChild(2)->getData()
+              $node->getChild("media")->getData()
             );
           }
-          $this->sendMessageReceived($node);
+
+          if($autoReceipt)
+          {
+              $this->sendMessageReceived($node);
+          }
         }
         if ($node->getChild('x') != null)
         {
@@ -3183,38 +3188,28 @@
      *
      * @param ProtocolNode $msg
      *   The ProtocolTreeNode that contains the message.
+     * @param string|null $type
      */
-    protected function sendMessageReceived($msg)
+    protected function sendMessageReceived($msg, $type = null)
     {
-      $requestNode  = $msg->getChild("request");
-      $receivedNode = $msg->getChild("received");
-
-      if ($requestNode != null || $receivedNode != null)
+      if($type)
       {
-        $receivedHash          = array();
-        $receivedHash["xmlns"] = "urn:xmpp:receipts";
-        $response = "received";
-
-        if ($receivedNode != null)
-        {
-          $response = "ack";
-        }
-
-        $receivedNode = new ProtocolNode($response, $receivedHash, null, "");
-        $messageHash         = array();
-        $messageHash["to"]   = $msg->getAttribute("from");
-        $messageHash["type"] = "chat";
-        $messageHash["id"]   = $msg->getAttribute("id");
-        $messageHash["t"]    = time();
-        $messageNode         = new ProtocolNode("message", $messageHash, array($receivedNode), "");
-        $this->sendNode($messageNode);
-
-        $this->eventManager()->fireSendMessageReceived(
-          $this->phoneNumber,
-          $messageHash["t"],
-          $msg->getAttribute("from")
-        );
+        $messageHash["type"] = $type;
       }
+
+      $messageHash = array();
+      $messageHash["to"] = $msg->getAttribute("from");
+      $messageHash["id"] = $msg->getAttribute("id");
+      $messageNode = new ProtocolNode("receipt", $messageHash, null, null);
+
+      $this->sendNode($messageNode);
+
+      $this->eventManager()->fireSendMessageReceived(
+        $this->phoneNumber,
+        $msg->getAttribute("id"),
+        $msg->getAttribute("from"),
+        $type
+      );
     }
 
 
