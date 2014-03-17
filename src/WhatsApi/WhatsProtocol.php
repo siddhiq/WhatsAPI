@@ -571,6 +571,27 @@
 
 
     /**
+     * Fetch a single message node
+     *
+     * @param bool $autoReceipt
+     * @return bool
+     */
+    public function pollMessage($autoReceipt = true)
+    {
+      $stanza = $this->readStanza();
+
+      if($stanza)
+      {
+        $this->processInboundData($stanza, $autoReceipt);
+        return true;
+      }
+
+      return false;
+    }
+
+
+
+    /**
      * Send the active status. User will show up as "Online" (as long as socket is connected).
      *
      */
@@ -1125,7 +1146,11 @@
       $txt      = $this->parseMessageForEmojis($txt);
       $bodyNode = new ProtocolNode("body", null, null, $txt);
 
-      return $this->sendMessageNode($to, $bodyNode, $id);
+      $id = $this->sendMessageNode($to, $bodyNode, $id);
+
+      $this->waitForServer($id);
+
+      return $id;
     }
 
 
@@ -1224,12 +1249,14 @@
 
       if (is_array($to))
       {
-        $this->sendBroadcast($to, $mediaNode);
+        $id = $this->sendBroadcast($to, $mediaNode);
       }
       else
       {
-        $this->sendMessageNode($to, $mediaNode);
+        $id = $this->sendMessageNode($to, $mediaNode);
       }
+
+      $this->waitForServer($id);
     }
 
 
@@ -1638,9 +1665,10 @@
     /**
      * Wait for Whatsapp server to acknowledge *it* has received message.
      *
-     * @param  string $id The id of the node sent that we are awaiting acknowledgement of.
+     * @param string $id The id of the node sent that we are awaiting acknowledgement of.
+     * @param int $timeout
      */
-    public function waitForServer($id)
+    public function waitForServer($id, $timeout = 5)
     {
       $time                   = time();
       $this->serverReceivedId = false;
@@ -1648,7 +1676,7 @@
       do
       {
         $this->pollMessages();
-      } while ($this->serverReceivedId !== $id && time() - $time < 5);
+      } while ($this->serverReceivedId !== $id && time() - $time < $timeout);
     }
 
 
@@ -2187,6 +2215,8 @@
     protected function processInboundDataNode(ProtocolNode $node, $autoReceipt = true)
     {
       $this->debugPrint($node->nodeString("rx  ") . "\n");
+      $this->serverReceivedId = $node->getAttribute('id');
+
       if ($node->getTag() == "challenge")
       {
         $this->processChallenge($node);
@@ -2372,7 +2402,6 @@
         }
         if ($node->getChild('x') != null)
         {
-          $this->serverReceivedId = $node->getAttribute('id');
           $this->eventManager()->fireMessageReceivedServer(
             $this->phoneNumber,
             $node->getAttribute('from'),
@@ -2513,7 +2542,6 @@
         && $node->getAttribute('type') == "result"
       )
       {
-        $this->serverReceivedId = $node->getAttribute('id');
         if ($node->getChild("query") != null)
         {
           if ($node->getChild(0)->getAttribute('xmlns') == 'jabber:iq:privacy')
@@ -2614,7 +2642,6 @@
       }
       if ($node->getTag() == "iq" && $node->getAttribute('type') == "error")
       {
-        $this->serverReceivedId = $node->getAttribute('id');
         $this->eventManager()->fireGetError(
           $this->phoneNumber,
           $node->getChild(0)
@@ -3030,6 +3057,8 @@
      *
      * @param  array  $targets Array of numbers to send to
      * @param  ProtocolNode $node
+     *
+     * @return string
      */
     protected function sendBroadcast($targets, $node)
     {
@@ -3056,7 +3085,9 @@
       $messageHash         = array();
       $messageHash["to"]   = "broadcast";
       $messageHash["type"] = "chat";
-      $messageHash["id"]   = $this->createMsgId("broadcast");
+      $id = $this->createMsgId("broadcast");
+      $messageHash["id"] = $id;
+
       $messageNode = new ProtocolNode("message", $messageHash, array($broadcastNode, $xNode, $node), null);
 
       $this->sendNode($messageNode);
@@ -3068,6 +3099,8 @@
         $messageHash["id"],
         $node
       );
+
+      return $id;
     }
 
 
@@ -3280,7 +3313,9 @@
       }
 
       //add to queue
-      $this->mediaQueue[$id] = array("messageNode" => $node, "filePath" => $filepath, "to" => $to);
+      $messageId = $this->createMsgId("message");
+      $this->mediaQueue[$id] = array("messageNode" => $node, "filePath" => $filepath, "to" => $to, "message_id" => $messageId);
+
       $this->sendNode($node);
       $this->waitForServer($hash["id"]);
     }
