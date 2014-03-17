@@ -5,8 +5,7 @@ See Events/WhatsAppEventListener.php.
 How to bind a callback to an event
 ==================================
 
-# Create a WhatsAppEventListener class and implement the method you
-#  would like to handle:
+## Create a WhatsAppEventListener class and implement the method you would like to handle:
 ```php
 
 class MyEventListener extends \WhatsApi\Events\WhatsAppEventListenerBase {
@@ -23,19 +22,19 @@ class MyEventListener extends \WhatsApi\Events\WhatsAppEventListenerBase {
     }
 }
 ```
-# Create an instance of WhastProt.
+## Create an instance of WhastProt.
 ```php
 $w = new \WhatsApi\WhatsProtocol($userPhone, $userIdentity, $userName, $debug);
 ```
-# Add your event listener.
+## Add your event listener.
 ```php
 w->eventManager()->addEventListener(new MyEventListener());
 ```
-# Connect to WhatsApp servers.
+## Connect to WhatsApp servers.
 ```php
 $w->connect();
 ```
-# Login to WhatsApp
+## Login to WhatsApp
 ```php
 $w->loginWithPassword($password);
 ```
