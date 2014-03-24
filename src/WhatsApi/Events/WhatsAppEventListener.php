@@ -153,6 +153,7 @@
 
     function onGetError(
       $phone, // The user phone number including the country code.
+      $id, // The id of the request that caused the error
       $error // Array with error data for why request failed.
     );
 

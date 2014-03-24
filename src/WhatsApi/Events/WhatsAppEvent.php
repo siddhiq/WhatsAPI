@@ -298,12 +298,13 @@
 
     function fireGetError(
       $phone,
+      $id,
       $error
     )
     {
-      $callbackEvent = function (WhatsAppEventListener $listener) use ($phone, $error)
+      $callbackEvent = function (WhatsAppEventListener $listener) use ($phone, $id, $error)
       {
-        $listener->onGetError($phone, $error);
+        $listener->onGetError($phone, $id, $error);
       };
       $this->fireCallback($callbackEvent);
     }
