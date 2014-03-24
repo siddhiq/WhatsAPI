@@ -503,8 +503,7 @@
       $phone,
       $from,
       $msgid,
-      $type,
-      $time
+      $type
     )
     {
       $this->handleEvent(__FUNCTION__, func_get_args());

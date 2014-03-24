@@ -460,8 +460,7 @@
       $phone,
       $from,
       $msgid,
-      $type,
-      $time
+      $type
     )
     {
     }
