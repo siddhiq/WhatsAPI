@@ -815,10 +815,11 @@
     {
       $msgId = $this->createMsgId("getgroupinfo");
 
-      $child = new ProtocolNode("query", array("xmlns" => "w:g"), null, null);
+      $child = new ProtocolNode("query", null, null, null);
       $node  = new ProtocolNode("iq", array(
         "id"   => $msgId,
         "type" => "get",
+        "xmlns" => "w:g",
         "to"   => $this->getJID($gjid)
       ), array($child), null);
 
@@ -850,13 +851,13 @@
     {
       $msgId = $this->createMsgId("getgroupparticipants");
 
-      $child = new ProtocolNode("list", array(
-        "xmlns" => "w:g"
-      ), null, null);
-      $node  = new ProtocolNode("iq", array(
-        "id"   => $msgId,
-        "type" => "get",
-        "to"   => $this->getJID($gjid)
+      $child = new ProtocolNode("list", null, null, null);
+
+      $node = new ProtocolNode("iq", array(
+        "id"    => $msgId,
+        "type"  => "get",
+        "xmlns" => "w:g",
+        "to"    => $this->getJID($gjid)
       ), array($child), null);
 
       $this->sendNode($node);
@@ -1004,13 +1005,14 @@
     public function sendGroupsChatCreate($subject, $participants = array())
     {
       $groupHash            = array();
-      $groupHash["xmlns"]   = "w:g";
       $groupHash["action"]  = "create";
       $groupHash["subject"] = $subject;
       $group                = new ProtocolNode("group", $groupHash, null, "");
+
       $setHash         = array();
       $setHash["id"]   = $this->createMsgId("creategroup");
       $setHash["type"] = "set";
+      $setHash["xmlns"]= "w:g";
       $setHash["to"]   = static::WHATSAPP_GROUP_SERVER;
       $groupNode       = new ProtocolNode("iq", $setHash, array($group), "");
 
@@ -1042,13 +1044,15 @@
       $groupData       = array();
       $groupData['id'] = $gjid;
       $groupNode       = new ProtocolNode('group', $groupData, null, null);
+
       $leaveData           = array();
-      $leaveData["xmlns"]  = "w:g";
       $leaveData["action"] = "delete";
       $leaveNode           = new ProtocolNode("leave", $leaveData, array($groupNode), null);
+
       $iqData         = array();
       $iqData["id"]   = $msgID;
       $iqData["type"] = "set";
+      $iqData["xmlns"]= "w:g";
       $iqData["to"]   = static::WHATSAPP_GROUP_SERVER;
       $iqNode         = new ProtocolNode("iq", $iqData, array($leaveNode), null);
 
@@ -1077,11 +1081,13 @@
         $nodes[] = new ProtocolNode("group", array("id" => $this->getJID($gjid)), null, null);
       }
 
-      $leave        = new ProtocolNode("leave", array("xmlns" => "w:g", 'action' => 'delete'), $nodes, null);
+      $leave        = new ProtocolNode("leave", array('action'=>'delete'), $nodes, null);
+
       $hash         = array();
       $hash["id"]   = $this->createMsgId("leavegroups");
       $hash["to"]   = static::WHATSAPP_GROUP_SERVER;
       $hash["type"] = "set";
+      $hash["xmlns"]= "w:g";
       $node         = new ProtocolNode("iq", $hash, array($leave), null);
 
       $this->sendNode($node);
@@ -2235,6 +2241,7 @@
           $node->getChild(0)->getTag()
         );
       }
+
       if ($node->getTag() == "message")
       {
         array_push($this->messageQueue, $node);
@@ -2487,10 +2494,7 @@
           );
         }
       }
-      if ($node->getTag() == "iq"
-        && $node->getAttribute('type') == "get"
-        && $node->getChild(0)->getTag() == "ping"
-      )
+      if ($node->getTag() == "iq" && $node->getAttribute('type') == "get" && $node->getChild(0)->getTag() == "ping")
       {
         $this->eventManager()->firePing(
           $this->phoneNumber,
@@ -2498,9 +2502,7 @@
         );
         $this->sendPong($node->getAttribute('id'));
       }
-      if ($node->getTag() == "iq"
-        && $node->getChild("sync") != null
-      )
+      if ($node->getTag() == "iq" && $node->getChild("sync") != null)
       {
         //sync result
         $sync        = $node->getChild('sync');
@@ -2538,9 +2540,7 @@
           $node->getAttribute('retry')
         );
       }
-      if ($node->getTag() == "iq"
-        && $node->getAttribute('type') == "result"
-      )
+      if ($node->getTag() == "iq" && $node->getAttribute('type') == "result")
       {
         if ($node->getChild("query") != null)
         {
@@ -2647,7 +2647,9 @@
           $node->getChild(0)
         );
       }
+
       $children = $node->getChild(0);
+
       if ($node->getTag() == "stream:error" && empty($children) == false && $node->getChild(0)->getTag() == "system-shutdown")
       {
         throw new \Exception('Error system-shutdown');
@@ -2671,6 +2673,10 @@
             //TODO
             break;
           case "contacts":
+            //TODO
+            break;
+          case "participant":
+            //TODO
             break;
           default:
             throw new \Exception("Method $type not implemented");
@@ -3128,13 +3134,13 @@
     protected function sendGetGroupsFiltered($type)
     {
       $msgID = $this->createMsgId("getgroups");
-      $child = new ProtocolNode("list", array(
-        "xmlns" => "w:g",
-        "type"  => $type
-      ), null, null);
+
+      $child = new ProtocolNode("list", array( "type"  => $type ), null, null);
+
       $node  = new ProtocolNode("iq", array(
         "id"   => $msgID,
         "type" => "get",
+        "xmlns" => "w:g",
         "to"   => "g.us"
       ), array($child), null);
 
@@ -3156,19 +3162,20 @@
      */
     protected function sendGroupsChangeParticipants($groupId, $participants, $tag)
     {
-      $Participants = array();
+      $_participants = array();
 
       foreach ($participants as $participant)
       {
-        $Participants[] = new ProtocolNode("participant", array("jid" => $this->getJID($participant)), null, "");
+        $_participants[] = new ProtocolNode("participant", array("jid" => $this->getJID($participant)), null, "");
       }
 
       $childHash          = array();
-      $childHash["xmlns"] = "w:g";
-      $child              = new ProtocolNode($tag, $childHash, $Participants, "");
+      $child              = new ProtocolNode($tag, $childHash, $_participants, "");
+
       $setHash         = array();
       $setHash["id"]   = $this->createMsgId("participants");
       $setHash["type"] = "set";
+      $setHash["xmlns"] = "w:g";
       $setHash["to"]   = $this->getJID($groupId);
       $node = new ProtocolNode("iq", $setHash, array($child), "");
 
