@@ -761,12 +761,11 @@
       $phone = $this->dissectPhone();
 
       $attr             = array();
-      $attr["xmlns"]    = "urn:xmpp:whatsapp:push";
       $attr["platform"] = "none";
       $attr["lc"]       = $phone["ISO3166"];
       $attr["lg"]       = $phone["ISO639"];
       $child            = new ProtocolNode("config", $attr, null, "");
-      $node             = new ProtocolNode("iq", array("id" => $this->createMsgId("config"), "type" => "set", "to" => static::WHATSAPP_SERVER), array($child), null);
+      $node             = new ProtocolNode("iq", array("id" => $this->createMsgId("config"), "type" => "set", "xmlns" => "urn:xmpp:whatsapp:push", "to" => static::WHATSAPP_SERVER), array($child), null);
 
       $this->sendNode($node);
     }
@@ -954,12 +953,12 @@
      */
     public function sendGetServerProperties()
     {
-      $child = new ProtocolNode("props", array(
-        "xmlns" => "w"
-      ), null, null);
+      $child = new ProtocolNode("props", null, null, null);
+
       $node  = new ProtocolNode("iq", array(
         "id"   => $this->createMsgId("getproperties"),
         "type" => "get",
+        "xmlns" => "w",
         "to"   => "s.whatsapp.net"
       ), array($child), null);
 
