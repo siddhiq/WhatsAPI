@@ -649,8 +649,6 @@
      * Base callback fired when synchronization result is obtained
      *
      * @param \WhatsApi\Models\SyncResult $result
-     *
-     * @return mixed
      */
     public function onGetSyncResult(
       $result
