@@ -2261,7 +2261,7 @@
         }
         if ($node->getAttribute("type") == "text" && $node->getChild('body') != null)
         {
-          $author = $node->getAttribute("author");
+          $author = $node->getAttribute("participant");
           if ($author == "")
           {
             //private chat message
